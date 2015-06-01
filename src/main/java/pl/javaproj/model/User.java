@@ -18,7 +18,7 @@ public abstract class User {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	
-	private String login;
+	protected String login;
 	private Date registrationDate;
 	private String avatarFilename;
 	
@@ -58,4 +58,5 @@ public abstract class User {
 	public abstract void receiveMode(String author, String channel, String modeChange) throws IOException;
 	public abstract void receiveJoin(String channel, String who) throws IOException;
 	public abstract void receiveQuit(String who, String message) throws IOException;
+	public abstract void receiveNick(String who, String nick) throws IOException;
 }

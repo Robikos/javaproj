@@ -1,5 +1,6 @@
 package pl.javaproj.service;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -11,6 +12,10 @@ import pl.javaproj.dao.ChannelDAO;
 @Service
 public class ChannelServiceImpl implements ChannelService{
 	private ChannelDAO channelDAO;
+	static private ChannelService instance;
+	
+	// TODO: remove this hack
+	private HashMap<String, Channel> channels = new HashMap<String, Channel>();
 	
 	public void setChannelDAO(ChannelDAO channelDAO)
 	{
@@ -40,6 +45,22 @@ public class ChannelServiceImpl implements ChannelService{
 	@Transactional
 	public void removeChannel(int id) {
 		this.channelDAO.removeChannel(id);
+	}
+
+	public static ChannelService getInstance() {
+		if (instance == null)
+		{
+			instance = new ChannelServiceImpl();
+		}
+		return instance;
+	}
+
+	public Channel getChannelByName(String name) {
+		if (!channels.containsKey(name)) {
+			 channels.put(name, new Channel());
+		}
+		
+		return channels.get(name);
 	}
 	
 	

@@ -1,5 +1,8 @@
 package pl.javaproj.model;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +12,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="channels")
-public class Channel {
+public class Channel implements Iterable<User> {
 	
 	@Id
 	@Column(name="id")
@@ -19,6 +22,8 @@ public class Channel {
 	private String name;
 	private String topic;
 	private String description;
+	
+	private ArrayList<User> users = new ArrayList<User>();
 	
 	public int getId() {
 		return id;
@@ -50,6 +55,12 @@ public class Channel {
 		return "Channel [id=" + id + ", name=" + name + ", topic=" + topic
 				+ ", description=" + description + "]";
 	}
+	public Iterator<User> iterator() {
+		return users.iterator();
+	}
 	
-	
+	public void joinUser(User user)
+	{
+		users.add(user);
+	}
 }

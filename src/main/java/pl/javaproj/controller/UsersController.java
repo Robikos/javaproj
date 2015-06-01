@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import pl.javaproj.model.IRCUser;
 import pl.javaproj.model.User;
 import pl.javaproj.service.UserService;
 
@@ -25,13 +26,13 @@ public class UsersController {
 		this.userService = cs;
 	}
 	
-	@RequestMapping(value = "/users", method = RequestMethod.GET)
+/*	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String index(Model model) {	
 		model.addAttribute("user", new User());
 		model.addAttribute("listusers", this.userService.listUsers());
 		//returns the view name
 		return "users_index";
-	}
+	}*/
 	
 	@RequestMapping(value="/users/add", method = RequestMethod.POST)
 	public String addUser(@ModelAttribute("user") User p)
