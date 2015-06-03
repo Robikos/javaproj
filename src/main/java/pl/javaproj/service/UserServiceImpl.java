@@ -36,11 +36,14 @@ public class UserServiceImpl implements UserService{
 	public User getUserById(int id) {
 		return this.userDAO.getUserById(id);
 	}
+	
+	@Transactional
+	public User getUserByName(String name) {
+		return this.userDAO.getUserByName(name);
+	}
 
 	@Transactional
 	public void removeUser(int id) {
 		this.userDAO.removeUser(id);
 	}
-	
-	
 }

@@ -2,6 +2,8 @@ package pl.javaproj.dao;
 
 import java.util.List;
 
+import org.hibernate.Query;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
@@ -19,11 +21,13 @@ public class UserDAOImpl implements UserDAO {
 
 	public void addUser(User p) {
 		Session session = this.sessionFactory.getCurrentSession();
+		//User user = (User)p;
 		session.persist(p);
 	}
 
 	public void updateUser(User p) {
 		Session session = this.sessionFactory.getCurrentSession();
+		//User user = (User)p;
 		session.update(p);
 	}
 
@@ -37,6 +41,16 @@ public class UserDAOImpl implements UserDAO {
 	public User getUserById(int id) {
 		Session session = this.sessionFactory.getCurrentSession();
 		User p = (User) session.get(User.class, new Integer(id));
+		return p;
+	}
+	
+	@Override
+	public User getUserByName(String name) {
+		Session session = this.sessionFactory.getCurrentSession();
+		Query query= session.
+		        createQuery("from User where login=:name");
+		query.setParameter("name", name);
+		User p = (User) query.uniqueResult();
 		return p;
 	}
 

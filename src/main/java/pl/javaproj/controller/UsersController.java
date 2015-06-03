@@ -1,5 +1,6 @@
 package pl.javaproj.controller;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -9,13 +10,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
-import pl.javaproj.model.IRCUser;
+import pl.javaproj.model.Channel;
 import pl.javaproj.model.User;
 import pl.javaproj.service.UserService;
 
 @Controller
+@SessionAttributes("currentUser")
 public class UsersController {
+	
+	private static int workload = 12;
 	
 	private UserService userService;
 	
@@ -26,17 +31,56 @@ public class UsersController {
 		this.userService = cs;
 	}
 	
-/*	@RequestMapping(value = "/users", method = RequestMethod.GET)
+	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String index(Model model) {	
-		model.addAttribute("user", new User());
-		model.addAttribute("listusers", this.userService.listUsers());
+		model.addAttribute("listUsers", this.userService.listUsers());
 		//returns the view name
 		return "users_index";
-	}*/
+	}
+	
+	@RequestMapping(value = "/users/me", method = RequestMethod.GET)
+	public String me(Model model) {	
+		//returns the view name
+		return "users_show";
+	}
+	
+	@RequestMapping(value = "/users/login", method = RequestMethod.GET)
+	public String loginGet(Model model) {
+		model.addAttribute("user", new User());
+		//returns the view name
+		return "users_login";
+	}
+	
+	@RequestMapping(value = "/users/login", method = RequestMethod.POST)
+	public String loginPost(@ModelAttribute("user") User p, Model model) {
+		User user = this.userService.getUserByName(p.getLogin());
+		boolean verified = BCrypt.checkpw(p.getPassword(), user.getEncrypted_password());
+		//returns the view name
+		if (verified == true)
+		{
+			model.addAttribute("currentUser", user);
+			return "users_success";
+		}
+		else
+		{
+			return "users_fail";
+		}
+	}
+	
+	@RequestMapping(value="/users/add", method = RequestMethod.GET)
+	public String addUserGet(Model model)
+	{
+		model.addAttribute("user", new User());
+		return "users_add";
+	}
 	
 	@RequestMapping(value="/users/add", method = RequestMethod.POST)
-	public String addUser(@ModelAttribute("user") User p)
+	public String addUserPost(@ModelAttribute("user") User p)
 	{
+		String password = p.getPassword();
+		String salt = BCrypt.gensalt(workload);
+		String hashed_password = BCrypt.hashpw(password, salt);
+		p.setEncrypted_password(hashed_password);
 		if (p.getId() == 0)
 		{
 			this.userService.addUser(p);
@@ -60,7 +104,7 @@ public class UsersController {
 	public String editUser(@PathVariable("id") int id, Model model)
 	{
 		model.addAttribute("user", this.userService.getUserById(id));
-		model.addAttribute("listusers", this.userService.listUsers());
+		model.addAttribute("listUsers", this.userService.listUsers());
 		return "users_index";
 	}
 }

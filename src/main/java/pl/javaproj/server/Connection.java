@@ -1,24 +1,29 @@
-package pl.javaproj.model;
+package pl.javaproj.server;
 
-import pl.javaproj.model.User;
-import pl.javaproj.service.ChannelService;
-import pl.javaproj.service.ChannelServiceImpl;
-
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public final class IRCUser extends User implements Runnable{
-    private Socket clientSocket;
+import pl.javaproj.model.Channel;
+import pl.javaproj.model.User;
+import pl.javaproj.service.ChannelServiceImpl;
+
+public class Connection implements Runnable{
+	private Socket clientSocket;
     DataOutputStream outputStream;
     DataInputStream inputStream;
     BufferedReader reader;
+    User user;
     
     String ident;
     String realname;
     
-    public IRCUser(Socket socket)
+    public Connection(Socket socket)
     {
     	try {
 			setSocket(socket);
@@ -34,6 +39,7 @@ public final class IRCUser extends User implements Runnable{
         inputStream = new DataInputStream(socket.getInputStream());
         clientSocket = socket;
         reader = new BufferedReader(new InputStreamReader(inputStream));
+        user = new User();
     }
 
     public void receiveMessage(String target, String source, String value) throws IOException
@@ -72,7 +78,6 @@ public final class IRCUser extends User implements Runnable{
         outputStream.writeBytes(msg);
     }
 
-	@Override
 	public void receiveNick(String who, String nick) throws IOException {
 		String message = ":" + who + " NICK :" + nick + "\r\n";
 		outputStream.writeBytes(message);
@@ -109,13 +114,13 @@ public final class IRCUser extends User implements Runnable{
 						ident = list.get(1);
 						realname = list.get(4);
 						
-						receiveIRC(":awesome-server 001 " + login + " :foo\r\n");
-						receiveIRC(":awesome-server 002 " + login + " :bar\r\n");
-						receiveIRC(":awesome-server 003 " + login + " :bazz\r\n");
-						receiveIRC(":awesome-server 004 " + login + " :buzz\r\n");
+						receiveIRC(":awesome-server 001 " + user.getLogin() + " :foo\r\n");
+						receiveIRC(":awesome-server 002 " + user.getLogin() + " :bar\r\n");
+						receiveIRC(":awesome-server 003 " + user.getLogin() + " :bazz\r\n");
+						receiveIRC(":awesome-server 004 " + user.getLogin() + " :buzz\r\n");
 						
-						receiveIRC(":awesome-server 251 " + login + " :foobar\r\n");
-						receiveIRC(":awesome-server 422 " + login + " :no motd for you\r\n");
+						receiveIRC(":awesome-server 251 " + user.getLogin() + " :foobar\r\n");
+						receiveIRC(":awesome-server 422 " + user.getLogin() + " :no motd for you\r\n");
 						
 						break;
 					}
@@ -128,8 +133,8 @@ public final class IRCUser extends User implements Runnable{
 							return;
 						}
 						
-						login = list.get(1);
-						receiveNick(login + "!" + ident + "@our-awesome-server", login);
+						user.setLogin(list.get(1));
+						receiveNick(user.getLogin() + "!" + ident + "@our-awesome-server", user.getLogin());
 						
 						break;
 					}
@@ -143,10 +148,10 @@ public final class IRCUser extends User implements Runnable{
 						}
 						
 						Channel ch = ChannelServiceImpl.getInstance().getChannelByName(list.get(1));
-						ch.joinUser(this);
+						ch.joinUser(user);
 						for (User user : ch)
 						{
-							user.receiveJoin(list.get(1), login + "!" + ident + "@out-awesome-server");
+							receiveJoin(list.get(1), user.getLogin() + "!" + ident + "@out-awesome-server");
 						}
 						
 						break;
@@ -163,9 +168,9 @@ public final class IRCUser extends User implements Runnable{
 						Channel ch = ChannelServiceImpl.getInstance().getChannelByName(list.get(1));
 						for (User user : ch)
 						{
-							if (user != this)
+							if (user != this.user)
 							{
-								user.receiveMessage(list.get(1), login + "!" + ident + "@out-awesome-server", list.get(2));
+								receiveMessage(list.get(1), user.getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
 							}
 						}
 						
@@ -195,5 +200,4 @@ public final class IRCUser extends User implements Runnable{
 		}
 		return list;
 	}
-
-};
+}

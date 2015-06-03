@@ -8,7 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name="channels")
@@ -23,6 +26,7 @@ public class Channel implements Iterable<User> {
 	private String topic;
 	private String description;
 	
+	@Transient
 	private ArrayList<User> users = new ArrayList<User>();
 	
 	public int getId() {

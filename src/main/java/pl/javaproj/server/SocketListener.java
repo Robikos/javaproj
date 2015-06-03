@@ -3,8 +3,6 @@ package pl.javaproj.server;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import pl.javaproj.model.IRCUser;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,7 +18,7 @@ public class SocketListener  implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent arg0) {
 		try {
-			socket = new ServerSocket(6667);
+			socket = new ServerSocket(9999);
 			worker = new Thread(new Worker());
 			worker.start();
 		} catch (IOException e) {
@@ -37,7 +35,7 @@ public class SocketListener  implements ServletContextListener {
 			{
 				try {
 					Socket client = socket.accept();
-					new Thread(new IRCUser(client)).start();
+					new Thread(new IRCConnection(client)).start();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
