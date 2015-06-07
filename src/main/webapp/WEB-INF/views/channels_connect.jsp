@@ -19,6 +19,7 @@
 <script type="text/javascript" src="../res/chat.js"></script>
 <script type="text/javascript">
 var username = '${user.login}';
+var channel = '${channel.name}';
 </script>
 
 <title>Channel - ${channel.name}</title>

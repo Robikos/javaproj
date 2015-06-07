@@ -40,6 +40,8 @@
     </table>
 </c:if>
 <br>
-<a href="<c:url value='/channels/add/' />" >Add a channel</a>
+<a href="<c:url value='/channels/add/' />" >Add a channel</a>, 
+<a href="<c:url value='/users/login/' />" >Login</a>, 
+<a href="<c:url value='/users/me' />" >Me</a>
 </body>
 </html>

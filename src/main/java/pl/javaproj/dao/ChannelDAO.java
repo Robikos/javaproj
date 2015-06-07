@@ -8,5 +8,6 @@ public interface ChannelDAO {
 	public void updateChannel(Channel p);
 	public List<Channel> listChannels();
 	public Channel getChannelById(int id);
+	public Channel getChannelByName(String name);
 	public void removeChannel(int id);
 }

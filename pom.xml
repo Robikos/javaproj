@@ -107,6 +107,36 @@
             <version>${spring.version}</version>
  </dependency>
  
+ <!--  dla serwer socketa -->
+ <dependency>
+   <groupId>org.springframework</groupId>
+   <artifactId>spring-websocket</artifactId>
+   <version>${spring.version}</version>
+</dependency>
+<dependency>
+   <groupId>org.springframework</groupId>
+   <artifactId>spring-messaging</artifactId>
+   <version>${spring.version}</version>
+</dependency>
+<dependency>
+   <groupId>javax.servlet</groupId>
+   <artifactId>javax.servlet-api</artifactId>
+   <version>3.1.0</version>
+</dependency>
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.3.0</version>
+</dependency>
+
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.3.0</version>
+</dependency>
+
+<!-- koniec serwer socketa -->
+ 
  <dependency>
 	<groupId>jstl</groupId>
 	<artifactId>jstl</artifactId>

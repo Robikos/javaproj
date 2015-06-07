@@ -148,10 +148,10 @@ public class Connection implements Runnable{
 						}
 						
 						Channel ch = ChannelServiceImpl.getInstance().getChannelByName(list.get(1));
-						ch.joinUser(user);
-						for (User user : ch)
+						ch.joinUser(this);
+						for (Connection connection : ch)
 						{
-							receiveJoin(list.get(1), user.getLogin() + "!" + ident + "@out-awesome-server");
+							connection.receiveJoin(list.get(1), connection.user.getLogin() + "!" + ident + "@out-awesome-server");
 						}
 						
 						break;
@@ -166,11 +166,11 @@ public class Connection implements Runnable{
 						}
 						
 						Channel ch = ChannelServiceImpl.getInstance().getChannelByName(list.get(1));
-						for (User user : ch)
+						for (Connection connection : ch)
 						{
-							if (user != this.user)
+							if (connection != this)
 							{
-								receiveMessage(list.get(1), user.getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
+								connection.receiveMessage(list.get(1), user.getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
 							}
 						}
 						

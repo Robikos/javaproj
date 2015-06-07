@@ -13,9 +13,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import pl.javaproj.server.Connection;
+import pl.javaproj.server.WebConnection;
+
 @Entity
 @Table(name="channels")
-public class Channel implements Iterable<User> {
+public class Channel implements Iterable<Connection>{
 	
 	@Id
 	@Column(name="id")
@@ -27,7 +30,9 @@ public class Channel implements Iterable<User> {
 	private String description;
 	
 	@Transient
-	private ArrayList<User> users = new ArrayList<User>();
+	private ArrayList<Connection> connections = new ArrayList<Connection>();
+	@Transient
+	private ArrayList<WebConnection> webconnections = new ArrayList<WebConnection>();
 	
 	public int getId() {
 		return id;
@@ -59,12 +64,31 @@ public class Channel implements Iterable<User> {
 		return "Channel [id=" + id + ", name=" + name + ", topic=" + topic
 				+ ", description=" + description + "]";
 	}
-	public Iterator<User> iterator() {
-		return users.iterator();
+	public Iterator<Connection> iterator() {
+		return connections.iterator();
 	}
 	
-	public void joinUser(User user)
+	public ArrayList<WebConnection> getWebConnections() {
+		return webconnections;
+	}
+	
+	public void joinUser(Connection connection)
 	{
-		users.add(user);
+		connections.add(connection);
+	}
+	
+	public int usersCount()
+	{
+		return connections.size();
+	}
+	
+	public void joinWebUser(WebConnection connection)
+	{
+		webconnections.add(connection);
+	}
+	
+	public int webusersCount()
+	{
+		return webconnections.size();
 	}
 }

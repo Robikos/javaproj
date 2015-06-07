@@ -7,9 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import java.util.Date;
-import java.io.IOException;
 
 @Entity
 @Table(name="users")
@@ -68,12 +66,4 @@ public class User {
 	public String toString() {
 		return "User [id=" + id + ", login=" + login + "]";
 	}
-	
-//	public abstract void receiveMessage(String target, String source, String value) throws IOException;
-//	public abstract void receiveNotice(String target, String source, String value) throws IOException;
-//	public abstract void receiveTopic(String author, String channel, String newTopic) throws IOException;
-//	public abstract void receiveMode(String author, String channel, String modeChange) throws IOException;
-//	public abstract void receiveJoin(String channel, String who) throws IOException;
-//	public abstract void receiveQuit(String who, String message) throws IOException;
-//	public abstract void receiveNick(String who, String nick) throws IOException;
 }

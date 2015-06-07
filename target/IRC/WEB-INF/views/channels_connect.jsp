@@ -15,10 +15,11 @@
 #input { width: 100% }
 </style>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
-<script type="text/javascript" src="http://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>
+<!-- <script type="text/javascript" src="http://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>  -->
 <script type="text/javascript" src="../res/chat.js"></script>
 <script type="text/javascript">
 var username = '${user.login}';
+var channel = '${channel.name}';
 </script>
 
 <title>Channel - ${channel.name}</title>

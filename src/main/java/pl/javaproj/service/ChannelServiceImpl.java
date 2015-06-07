@@ -56,10 +56,11 @@ public class ChannelServiceImpl implements ChannelService{
 	}
 
 	public Channel getChannelByName(String name) {
+		//return this.channelDAO.getChannelByName(name);
 		if (!channels.containsKey(name)) {
-			 channels.put(name, new Channel());
+			channels.put(name, new Channel());
 		}
-		
+					
 		return channels.get(name);
 	}
 	

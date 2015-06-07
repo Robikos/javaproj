@@ -1,15 +1,19 @@
 /**
  * 
  */
-var BASE_URL = 'ws://localhost:9998';
+var BASE_URL = 'ws://localhost:8080//IRC//websocket';
+var sock;
 
 $(document).ready(function(){
+	sock = new WebSocket(BASE_URL);
 	init();
 	
 	$("#submit").click(function()
 	{
-		console.log("Siema");
-		$("#messages").append("<b>Wcisnieto</b><br>");
+		msg = $("#input").val();
+		console.log("Wysylanie: "+msg);
+		$("#messages").append(username+ " napisal: "+msg+"<br>");
+		sock.send("PRIVMSG "+channel+":"+msg);
 	});
 
 });
@@ -23,17 +27,20 @@ function init()
 	
 	console.log("Łącze...");
 	
-    var sock = new WebSocket(BASE_URL);
+    
     
     sock.onopen = function()
     {
-       sock.send("User "+username+" trzy cztery piec");
+       sock.send("USER "+username+" trzy cztery piec");
+       sock.send("NICK "+username);
+       sock.send("JOIN "+channel);
        console.log("Socket connected");
     };
 		
     sock.onmessage = function (e) 
     { 
        console.log("Data received: "+e.data);
+       $("#messages").append(e.data+"<br>");
     };
 		
     sock.onclose = function()
