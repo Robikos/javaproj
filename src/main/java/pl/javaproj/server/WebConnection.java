@@ -64,13 +64,15 @@ public class WebConnection extends TextWebSocketHandler{
 				ident = list.get(1);
 				realname = list.get(4);
 				
-				response = receiveIRC(":awesome-server 001 " + getUser(session).getLogin() + " :foo\r\n");
-				response += receiveIRC(":awesome-server 002 " + getUser(session).getLogin() + " :bar\r\n");
-				response += receiveIRC(":awesome-server 003 " + getUser(session).getLogin() + " :bazz\r\n");
-				response += receiveIRC(":awesome-server 004 " + getUser(session).getLogin() + " :buzz\r\n");
+//				response = receiveIRC(":awesome-server 001 " + getUser(session).getLogin() + " :foo\r\n");
+//				response += receiveIRC(":awesome-server 002 " + getUser(session).getLogin() + " :bar\r\n");
+//				response += receiveIRC(":awesome-server 003 " + getUser(session).getLogin() + " :bazz\r\n");
+//				response += receiveIRC(":awesome-server 004 " + getUser(session).getLogin() + " :buzz\r\n");
+//				
+//				response += receiveIRC(":awesome-server 251 " + getUser(session).getLogin() + " :foobar\r\n");
+//				response += receiveIRC(":awesome-server 422 " + getUser(session).getLogin() + " :no motd for you\r\n");
 				
-				response += receiveIRC(":awesome-server 251 " + getUser(session).getLogin() + " :foobar\r\n");
-				response += receiveIRC(":awesome-server 422 " + getUser(session).getLogin() + " :no motd for you\r\n");
+				response = "{\"command\": \"USER\", \"target\": \"echo\", \"source\": \"server\", \"payload\": \""+ident+" "+realname+"\" }";
 				
 				break;
 			}
@@ -83,7 +85,8 @@ public class WebConnection extends TextWebSocketHandler{
 				}
 				
 				getUser(session).setLogin(list.get(1));
-				response = receiveNick(getUser(session).getLogin() + "!" + ident + "@our-awesome-server", getUser(session).getLogin());
+				//response = receiveNick(getUser(session).getLogin() + "!" + ident + "@our-awesome-server", getUser(session).getLogin());
+				response = receiveNick(getUser(session).getLogin(),getUser(session).getLogin());
 				
 				break;
 			}
@@ -102,10 +105,18 @@ public class WebConnection extends TextWebSocketHandler{
 				response = "";
 				for (WebSocketSession connection : ch.getWebConnections())
 				{
-					System.out.println(connection.toString());
-					String res = receiveJoin(list.get(1), getUser(connection).getLogin() + "!" + ident + "@out-awesome-server");
-					response += res;
-					connection.sendMessage(new TextMessage(res));
+					if (connection != session)
+					{
+						System.out.println(connection.toString());
+						String res = receiveJoin(getUser(session).getLogin(), getUser(connection).getLogin());  // + "!" + ident + "@out-awesome-server");
+						response += res;
+						connection.sendMessage(new TextMessage(res));
+					}
+				}
+				
+				for (Connection connection : ch)
+				{
+					connection.receiveJoin(list.get(1), getUser(session).getLogin());
 				}
 				
 				break;
@@ -127,21 +138,50 @@ public class WebConnection extends TextWebSocketHandler{
 					System.out.println(connection.toString());
 					if (connection != session)
 					{
-						String res = receiveMessage(list.get(1), getUser(connection).getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
-						response += res;
+						//String res = receiveMessage(list.get(1), getUser(connection).getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
+						String res = receiveMessage(getUser(session).getLogin(), "all" , list.get(2));
+						//response += res;
 						connection.sendMessage(new TextMessage(res));
 					}
 				}
 				
+				for (Connection connection : ch)
+				{
+					connection.receiveMessage(list.get(1), getUser(session).getLogin()+ "!" + ident + "@out-awesome-server", list.get(2));
+					//(list.get(1), getUser(session).getLogin());
+				}
+				
 				break;
 			}
+			case "QUIT":
+				if (list.size() != 4)
+				{
+					response = "Size mismatches";
+				}
+				Channel ch = ChannelServiceImpl.getInstance().getChannelByName(list.get(2));
+				response = "";
+				for (WebSocketSession connection : ch.getWebConnections())
+				{
+					System.out.println(connection.toString());
+					if (connection != session)
+					{
+						//String res = receiveMessage(list.get(1), getUser(connection).getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
+						String res = receiveQuit(list.get(1), list.get(2) , list.get(3));
+						//response += res;
+						connection.sendMessage(new TextMessage(res));
+					}
+				}
+				
+				
+				break;
 		}
 		return response;
 	}
 	
-	public String receiveMessage(String target, String source, String value)
+	public String receiveMessage(String source, String target, String value)
     {
-        String message = ":" + source + " PRIVMSG " + target + " :" + value + "\r\n";
+        //String message = ":" + source + " PRIVMSG " + target + " :" + value + "\r\n";
+		String message = "{ \"command\": \"PRIVMSG\", \"target\": \""+target+"\", \"source\": \""+source+"\", \"payload\": \""+value+"\" }";
         return message;
     }
 
@@ -165,18 +205,21 @@ public class WebConnection extends TextWebSocketHandler{
 
     public String receiveJoin(String channel, String who) 
     {
-        String message = ":" + who + " JOIN " + channel + "\r\n";
+        //String message = ":" + who + " JOIN " + channel + "\r\n";
+    	String message = "{ \"command\": \"JOIN\", \"target\": \""+who+"\", \"source\": \"server\", \"payload\": \""+channel+"\" }";
         return message;
     }
 
-    public String receiveQuit(String who, String message) 
+    public String receiveQuit(String who, String channel, String message) 
     {
-        String msg = ":" + who + " QUIT :" + message + "\r\n";
+        //String msg = ":" + who + " QUIT :" + message + "\r\n";
+    	String msg = "{ \"command\": \"QUIT\", \"target\": \""+who+"\", \"source\": \""+channel+"\", \"payload\": \""+message+"\" }";
         return msg;
     }
 
 	public String receiveNick(String who, String nick)  {
-		String message = ":" + who + " NICK :" + nick + "\r\n";
+		//String message = ":" + who + " NICK :" + nick + "\r\n";
+		String message = "{ \"command\": \"NICK\", \"target\": \""+who+"\", \"source\": \"server\", \"payload\": \""+nick+"\" }";
 		return message;
 	}
 	
