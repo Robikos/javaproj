@@ -3,6 +3,7 @@ package pl.javaproj.server;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -14,20 +15,20 @@ import pl.javaproj.service.ChannelServiceImpl;
 
 public class WebConnection extends TextWebSocketHandler{
 	
-	User user;
+	//User user;
 	String ident;
     String realname;
-    public WebSocketSession session;
-	
-	public WebConnection()
-	{
-		user = new User();
-	}
+    //public WebSocketSession session;
+    
+    private HashMap<WebSocketSession, User> webconnections = new HashMap<WebSocketSession, User>();
 	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception
 	{
-		this.session = session;
+		//webconnections[this] = new User();
+		if (!webconnections.containsKey(session)) {
+			webconnections.put(session, new User());
+		}
 	}
 	
 	@Override
@@ -35,13 +36,18 @@ public class WebConnection extends TextWebSocketHandler{
 	{
 		super.handleTextMessage(session, message);
 		String request = message.getPayload();
-		String response = generateResponse(request);
+		String response = generateResponse(request, session);
 		
 		System.out.println("Websocket Odebrano: "+response);
 		session.sendMessage(new TextMessage(response));
 	}
 	
-	public String generateResponse(String message) throws IOException
+	private User getUser(WebSocketSession session)
+	{
+		return webconnections.get(session);
+	}
+	
+	public String generateResponse(String message, WebSocketSession session) throws IOException
 	{
 		String response="";
 		
@@ -58,13 +64,13 @@ public class WebConnection extends TextWebSocketHandler{
 				ident = list.get(1);
 				realname = list.get(4);
 				
-				response = receiveIRC(":awesome-server 001 " + user.getLogin() + " :foo\r\n");
-				response += receiveIRC(":awesome-server 002 " + user.getLogin() + " :bar\r\n");
-				response += receiveIRC(":awesome-server 003 " + user.getLogin() + " :bazz\r\n");
-				response += receiveIRC(":awesome-server 004 " + user.getLogin() + " :buzz\r\n");
+				response = receiveIRC(":awesome-server 001 " + getUser(session).getLogin() + " :foo\r\n");
+				response += receiveIRC(":awesome-server 002 " + getUser(session).getLogin() + " :bar\r\n");
+				response += receiveIRC(":awesome-server 003 " + getUser(session).getLogin() + " :bazz\r\n");
+				response += receiveIRC(":awesome-server 004 " + getUser(session).getLogin() + " :buzz\r\n");
 				
-				response += receiveIRC(":awesome-server 251 " + user.getLogin() + " :foobar\r\n");
-				response += receiveIRC(":awesome-server 422 " + user.getLogin() + " :no motd for you\r\n");
+				response += receiveIRC(":awesome-server 251 " + getUser(session).getLogin() + " :foobar\r\n");
+				response += receiveIRC(":awesome-server 422 " + getUser(session).getLogin() + " :no motd for you\r\n");
 				
 				break;
 			}
@@ -76,8 +82,8 @@ public class WebConnection extends TextWebSocketHandler{
 					response = "Size mismatches";
 				}
 				
-				user.setLogin(list.get(1));
-				response = receiveNick(user.getLogin() + "!" + ident + "@our-awesome-server", user.getLogin());
+				getUser(session).setLogin(list.get(1));
+				response = receiveNick(getUser(session).getLogin() + "!" + ident + "@our-awesome-server", getUser(session).getLogin());
 				
 				break;
 			}
@@ -89,16 +95,17 @@ public class WebConnection extends TextWebSocketHandler{
 					response = "Size mismatches";
 				}
 				
-				System.out.println("Channel debug: "+list.get(1));
 				Channel ch = ChannelServiceImpl.getInstance().getChannelByName(list.get(1));
-				ch.joinWebUser(this);
-				System.out.println("Users count: "+ch.usersCount());
+				ch.joinWebUser(session);
+				System.out.println("Users count: "+ch.webusersCount());
+				System.out.println("Users in channel debug:");
 				response = "";
-				for (WebConnection connection : ch.getWebConnections())
+				for (WebSocketSession connection : ch.getWebConnections())
 				{
-					String res = receiveJoin(list.get(1), connection.user.getLogin() + "!" + ident + "@out-awesome-server");
+					System.out.println(connection.toString());
+					String res = receiveJoin(list.get(1), getUser(connection).getLogin() + "!" + ident + "@out-awesome-server");
 					response += res;
-					connection.session.sendMessage(new TextMessage(res));
+					connection.sendMessage(new TextMessage(res));
 				}
 				
 				break;
@@ -113,14 +120,16 @@ public class WebConnection extends TextWebSocketHandler{
 				
 				Channel ch = ChannelServiceImpl.getInstance().getChannelByName(list.get(1));
 				response = "";
-				System.out.println("Users count privmsg: "+ch.usersCount());
-				for (WebConnection connection : ch.getWebConnections())
+				System.out.println("Users count privmsg: "+ch.webusersCount());
+				System.out.println("Users in channel debug:");
+				for (WebSocketSession connection : ch.getWebConnections())
 				{
-					if (connection.user != this.user)
+					System.out.println(connection.toString());
+					if (connection != session)
 					{
-						String res = receiveMessage(list.get(1), connection.user.getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
+						String res = receiveMessage(list.get(1), getUser(connection).getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
 						response += res;
-						connection.session.sendMessage(new TextMessage(res));
+						connection.sendMessage(new TextMessage(res));
 					}
 				}
 				

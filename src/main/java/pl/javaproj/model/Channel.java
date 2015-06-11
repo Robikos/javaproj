@@ -13,8 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.springframework.web.socket.WebSocketSession;
 import pl.javaproj.server.Connection;
-import pl.javaproj.server.WebConnection;
 
 @Entity
 @Table(name="channels")
@@ -32,7 +32,7 @@ public class Channel implements Iterable<Connection>{
 	@Transient
 	private ArrayList<Connection> connections = new ArrayList<Connection>();
 	@Transient
-	private ArrayList<WebConnection> webconnections = new ArrayList<WebConnection>();
+	private ArrayList<WebSocketSession> webconnections = new ArrayList<WebSocketSession>();
 	
 	public int getId() {
 		return id;
@@ -61,14 +61,15 @@ public class Channel implements Iterable<Connection>{
 	
 	@Override
 	public String toString() {
-		return "Channel [id=" + id + ", name=" + name + ", topic=" + topic
-				+ ", description=" + description + "]";
+		//return "Channel [id=" + id + ", name=" + name + ", topic=" + topic
+		//		+ ", description=" + description + "]";
+		return "Channel code: "+System.identityHashCode(this);
 	}
 	public Iterator<Connection> iterator() {
 		return connections.iterator();
 	}
 	
-	public ArrayList<WebConnection> getWebConnections() {
+	public ArrayList<WebSocketSession> getWebConnections() {
 		return webconnections;
 	}
 	
@@ -82,7 +83,7 @@ public class Channel implements Iterable<Connection>{
 		return connections.size();
 	}
 	
-	public void joinWebUser(WebConnection connection)
+	public void joinWebUser(WebSocketSession connection)
 	{
 		webconnections.add(connection);
 	}
