@@ -25,7 +25,7 @@ $(document).ready(function(){
 	{
 		msg = $("#input").val();
 		console.log("Wysylanie: "+msg);
-		$("#messages").append(username+ " napisal: "+msg+"<br>");
+		$("#messages").append(username+ " napisal: <b>"+msg+"</b><br>");
 		sock.send("PRIVMSG "+channel+":"+msg);
 	});
 
@@ -68,6 +68,8 @@ function init()
 
 function parseRec(recv)
 {
+	if (recv == "") return "";
+	
 	var json = JSON.parse(recv);
 	response = "";
 	switch(json.command)
@@ -75,7 +77,7 @@ function parseRec(recv)
 		case "USER":
 			target = json.target;
 			payload = json.payload;
-			response = "Połączenie: target->"+target", payload->"+payload+"<br>";
+			response = "Połączenie: target->"+target+", payload->"+payload+"<br>";
 			break;
 		case "NICK":
 			response = "Dołączył nick: <b>"+json.payload+"</b><br>";
@@ -91,20 +93,20 @@ function parseRec(recv)
 			msg = json.payload;
 			if (who == "all")
 			{
-				response = who + " napisał: <b>"+msg+"</b><br>";
+				response = from + " napisał: <b>"+msg+"</b><br>";
 			}
 			else
 			{
-				response = who + " napisał do "+who+": <b>"+msg+"</b><br>";
+				response = from + " napisał do "+who+": <b>"+msg+"</b><br>";
 			}
 			break;
 		case "NAMES":
 			break;
 		case "QUIT":
 			who = json.target;
-			channel = json.source;
+			channelname = json.source;
 			message = json.payload;
-			response = who+" odchodzi z wiadomością: <b>"+message+"</b> z kanału: "+channel+" <br>";
+			response = who+" odchodzi z wiadomością: <b>"+message+"</b> z kanału: "+channelname+" <br>";
 			break;
 	}
 	

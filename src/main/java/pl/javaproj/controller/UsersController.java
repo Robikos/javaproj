@@ -54,6 +54,8 @@ public class UsersController {
 	@RequestMapping(value = "/users/login", method = RequestMethod.POST)
 	public String loginPost(@ModelAttribute("user") User p, Model model) {
 		User user = this.userService.getUserByName(p.getLogin());
+		if (user == null) return "users_fail";
+		
 		boolean verified = BCrypt.checkpw(p.getPassword(), user.getEncrypted_password());
 		//returns the view name
 		if (verified == true)

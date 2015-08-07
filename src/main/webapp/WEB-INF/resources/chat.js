@@ -101,6 +101,8 @@ function parseRec(recv)
 			}
 			break;
 		case "NAMES":
+			names = json.payload;
+			$("#rcontent").html(names.replace(/_/g, "<br>"));
 			break;
 		case "QUIT":
 			who = json.target;

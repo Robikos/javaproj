@@ -20,7 +20,7 @@ public class WebConnection extends TextWebSocketHandler{
     String realname;
     //public WebSocketSession session;
     
-    private HashMap<WebSocketSession, User> webconnections = new HashMap<WebSocketSession, User>();
+    private static HashMap<WebSocketSession, User> webconnections = new HashMap<WebSocketSession, User>();
 	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception
@@ -42,7 +42,7 @@ public class WebConnection extends TextWebSocketHandler{
 		session.sendMessage(new TextMessage(response));
 	}
 	
-	private User getUser(WebSocketSession session)
+	public static User getUser(WebSocketSession session)
 	{
 		return webconnections.get(session);
 	}
@@ -103,21 +103,31 @@ public class WebConnection extends TextWebSocketHandler{
 				System.out.println("Users count: "+ch.webusersCount());
 				System.out.println("Users in channel debug:");
 				response = "";
+				
+				String names = "";
+				names += getUser(session).getLogin() + "_";
 				for (WebSocketSession connection : ch.getWebConnections())
 				{
 					if (connection != session)
 					{
+						names += getUser(connection).getLogin();
+						names += "_";
 						System.out.println(connection.toString());
-						String res = receiveJoin(getUser(session).getLogin(), getUser(connection).getLogin());  // + "!" + ident + "@out-awesome-server");
-						response += res;
+						String res = receiveJoin(list.get(1), getUser(session).getLogin());  // + "!" + ident + "@out-awesome-server");
+						//response += res;
 						connection.sendMessage(new TextMessage(res));
 					}
 				}
 				
 				for (Connection connection : ch)
 				{
-					connection.receiveJoin(list.get(1), getUser(session).getLogin());
+					names += connection.user.getLogin();
+					names += "_";
+					connection.receiveJoin(list.get(1), getUser(session).getLogin() + "!web@out-awesome-server");
 				}
+				
+				System.out.println(names);
+				response = "{\"command\": \"NAMES\", \"payload\": \""+names+"\"}";
 				
 				break;
 			}
@@ -147,7 +157,7 @@ public class WebConnection extends TextWebSocketHandler{
 				
 				for (Connection connection : ch)
 				{
-					connection.receiveMessage(list.get(1), getUser(session).getLogin()+ "!" + ident + "@out-awesome-server", list.get(2));
+					connection.receiveMessage(list.get(1), getUser(session).getLogin() + "!web@out-awesome-server", list.get(2));
 					//(list.get(1), getUser(session).getLogin());
 				}
 				
@@ -178,52 +188,52 @@ public class WebConnection extends TextWebSocketHandler{
 		return response;
 	}
 	
-	public String receiveMessage(String source, String target, String value)
+	public static String receiveMessage(String source, String target, String value)
     {
         //String message = ":" + source + " PRIVMSG " + target + " :" + value + "\r\n";
 		String message = "{ \"command\": \"PRIVMSG\", \"target\": \""+target+"\", \"source\": \""+source+"\", \"payload\": \""+value+"\" }";
         return message;
     }
 
-    public String receiveNotice(String target, String source, String value) 
+    public static String receiveNotice(String target, String source, String value) 
     {
         String message = ":" + source + " NOTICE " + target + " :" + value + "\r\n";
         return message;
     }
 
-    public String receiveTopic(String author, String channel, String newTopic) 
+    public static String receiveTopic(String author, String channel, String newTopic) 
     {
         String message = ":" + author + " TOPIC " + channel + " :" + newTopic + "\r\n";
         return message;
     }
 
-    public String receiveMode(String author, String channel, String modeChange) 
+    public static String receiveMode(String author, String channel, String modeChange) 
     {
         String message = ":" + author + " MODE " + channel + " :" + modeChange + "\r\n";
         return message;
     }
 
-    public String receiveJoin(String channel, String who) 
+    public static String receiveJoin(String channel, String who) 
     {
         //String message = ":" + who + " JOIN " + channel + "\r\n";
     	String message = "{ \"command\": \"JOIN\", \"target\": \""+who+"\", \"source\": \"server\", \"payload\": \""+channel+"\" }";
         return message;
     }
 
-    public String receiveQuit(String who, String channel, String message) 
+    public static String receiveQuit(String who, String channel, String message) 
     {
         //String msg = ":" + who + " QUIT :" + message + "\r\n";
     	String msg = "{ \"command\": \"QUIT\", \"target\": \""+who+"\", \"source\": \""+channel+"\", \"payload\": \""+message+"\" }";
         return msg;
     }
 
-	public String receiveNick(String who, String nick)  {
+	public static String receiveNick(String who, String nick)  {
 		//String message = ":" + who + " NICK :" + nick + "\r\n";
 		String message = "{ \"command\": \"NICK\", \"target\": \""+who+"\", \"source\": \"server\", \"payload\": \""+nick+"\" }";
 		return message;
 	}
 	
-	private String receiveIRC(String raw) {
+	private static String receiveIRC(String raw) {
 		return raw;
 	}
 	

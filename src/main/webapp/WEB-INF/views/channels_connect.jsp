@@ -13,6 +13,8 @@
 	border-radius: 2px;
 }
 #input { width: 100% }
+#left { width: 80%; float: left;}
+#right { width: 20%; float: right;}
 </style>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
 <!-- <script type="text/javascript" src="http://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>  -->
@@ -29,6 +31,7 @@ Welcome to ${channel.name} Channel !<br>
 <br>
 Username: ${user.login}<br>
 Password: ${user.encrypted_password}<br>
+<div id="left">
 <h1>Czat:</h1>
 <div id="messages">
 	Tekst:
@@ -36,5 +39,15 @@ Password: ${user.encrypted_password}<br>
 Input:<br>
 <input id="input"></input><br>
 <button id="submit" type="button">Send!</button>
+</div>
+
+
+<div id="right">
+Lista:<br>
+<div id="rcontent">
+
+</div>
+</div>
+
 </body>
 </html>

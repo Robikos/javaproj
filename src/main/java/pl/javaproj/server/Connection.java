@@ -9,6 +9,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
 import pl.javaproj.model.Channel;
 import pl.javaproj.model.User;
 import pl.javaproj.service.ChannelServiceImpl;
@@ -149,10 +152,25 @@ public class Connection implements Runnable{
 						
 						Channel ch = ChannelServiceImpl.getInstance().getChannelByName(list.get(1));
 						ch.joinUser(this);
+						
+						String names = "";
+						
 						for (Connection connection : ch)
 						{
+							//if (connection != this)
+							names += connection.user.getLogin() + " ";
 							connection.receiveJoin(list.get(1), connection.user.getLogin() + "!" + ident + "@out-awesome-server");
 						}
+						
+						for (WebSocketSession connection : ch.getWebConnections())
+						{
+							names += WebConnection.getUser(connection).getLogin() + " ";
+							String res = WebConnection.receiveJoin(list.get(1), user.getLogin());
+							connection.sendMessage(new TextMessage(res));
+						}
+						
+						receiveIRC(":awesome-server 353 " + user.getLogin() + " = " + list.get(1) + " :" + names + "\r\n");
+						receiveIRC(":awesome-server 366 " + user.getLogin() + " " + list.get(1) + " :End of /NAMES list.\r\n");
 						
 						break;
 					}
@@ -172,6 +190,12 @@ public class Connection implements Runnable{
 							{
 								connection.receiveMessage(list.get(1), user.getLogin() + "!" + ident + "@out-awesome-server", list.get(2));
 							}
+						}
+						
+						for (WebSocketSession connection : ch.getWebConnections())
+						{
+							String res = WebConnection.receiveMessage(list.get(1), WebConnection.getUser(connection).getLogin(), list.get(2));
+							connection.sendMessage(new TextMessage(res));
 						}
 						
 						break;
